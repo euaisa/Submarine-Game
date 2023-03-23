@@ -177,8 +177,8 @@ var reset = function (resetHeroPosition) {
     let monsterOverlap;
     do {
         monsterOverlap = false;
-        monster.x = 32 + (Math.random() * (canvas.width - 64));
-        monster.y = 32 + (Math.random() * (canvas.height - 64));
+
+        placeItem(monster, 65);
 
         if (
             monster.x <= (obstacle.x + obstacleWidth) &&
@@ -187,6 +187,7 @@ var reset = function (resetHeroPosition) {
             obstacle.y <= (monster.y + monsterHeight)
         ) {
             monsterOverlap = true;
+            continue; // skip checking for the second obstacle since we already know it overlaps the first one
         }
 
         if (
@@ -199,16 +200,14 @@ var reset = function (resetHeroPosition) {
         }
     } while (monsterOverlap);
 
+
     // Move the obstacles to random positions ensuring there's enough space between them
     let enoughSpace;
     do {
         enoughSpace = true;
 
-        obstacle.x = 32 + (Math.random() * (canvas.width - 64));
-        obstacle.y = 32 + (Math.random() * (canvas.height - 64));
-
-        obstacle2.x = 32 + (Math.random() * (canvas.width - 64));
-        obstacle2.y = 32 + (Math.random() * (canvas.height - 64));
+        placeItem(obstacle, 75);
+        placeItem(obstacle2, 75);
 
         // Check if there's enough space between obstacles and the hero
         if (!checkDistance(hero, obstacle, 100) || !checkDistance(hero, obstacle2, 100)) {
@@ -234,9 +233,9 @@ var reset = function (resetHeroPosition) {
 
 
 // Generate random positions for the given character object
-let placeItem = function(character, canvasRight) {
-    character.x = canvasRight + (Math.random() * canvasRight);
-    character.y = 32 + (Math.random() * (canvas.height - 64));
+let placeItem = function(character, padding = 32) {
+    character.x = padding + Math.random() * (canvas.width - 2 * padding);
+    character.y = padding + Math.random() * (canvas.height - 2 * padding);
 };
 
 
@@ -252,15 +251,15 @@ var update = function (modifier) {
         if (38 in keysDown && hero.y > 32 + 4) { // holding up key
             newY -= hero.speed * modifier;
         }
-        if (40 in keysDown && hero.y < canvas.height - (heroHeight + 6)) { // holding down key
+        if (40 in keysDown && hero.y < canvas.height - (heroHeight + 32 + 4)) { // holding down key
             newY += hero.speed * modifier;
         }
         if (37 in keysDown && hero.x > (32 + 4)) { // holding left key
             newX -= hero.speed * modifier;
         }
-        if (39 in keysDown && hero.x < canvas.width - (heroWidth + 6)) { // holding right key
-            newX += hero.speed * modifier;
-        }
+        if (39 in keysDown && hero.x < canvas.width - (heroWidth + 32 + 4)) { // holding right key
+    newX += hero.speed * modifier;
+}
 
         // Check if the new position collides with any obstacle
         var collideObstacle1 = (
