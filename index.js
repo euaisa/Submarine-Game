@@ -28,14 +28,13 @@ bgImage.onload = function () {
 };
 bgImage.src = "images/background.jpg";
 
-document.body.appendChild(canvas);
 // Border image L-R
 var lrReady = false;
 var lrImage = new Image();
 lrImage.onload = function () {
     lrReady = true;
 };
-lrImage.src = "images/border_lr.png"; // <--- add image source
+lrImage.src = "images/bottomHedge164.jpg"; // <--- add image source
 
 // Border image B-T
 var btReady = false;
@@ -43,56 +42,63 @@ var btImage = new Image();
 btImage.onload = function () {
     btReady = true;
 };
-btImage.src = "images/border_bt.png"; // <--- add image source
+btImage.src = "images/bottomHedge121.jpg"; // <--- add image source
 
 
 // Hero image
 var heroReady = false;
 var heroImage = new Image();
+var heroWidth = 0;
+var heroHeight = 0;
 heroImage.onload = function () {
+    // Setting the desired width and height of the image
+    heroWidth = heroImage.width / 11;
+    heroHeight = heroImage.height / 11;
     heroReady = true;
 };
 heroImage.src = "images/hero.png";
-
-// Setting the desired width and height of the image
-var heroWidth = heroImage.width / 11;
-var heroHeight = heroImage.height / 11;
 
 
 // Monster image
 var monsterReady = false;
 var monsterImage = new Image();
+var monsterWidth = 0;
+var monsterHeight = 0;
 monsterImage.onload = function () {
+    // Setting the desired width and height of the image
+    monsterWidth = monsterImage.width / 10;
+    monsterHeight = monsterImage.height / 10;
     monsterReady = true;
 };
 monsterImage.src = "images/monster.png";
-// Setting the desired width and height of the image
-var monsterWidth = monsterImage.width / 10;
-var monsterHeight = monsterImage.height / 10;
 
 
 // Shark image
 var sharkReady = false;
 var sharkImage = new Image();
+var sharkWidth = 0;
+var sharkHeight = 0;
 sharkImage.onload = function () {
+    // Setting the desired width and height of the image
+    sharkWidth = sharkImage.width / 10;
+    sharkHeight = sharkImage.height / 10;
     sharkReady = true;
 };
 sharkImage.src = "images/shark.png";
-// Setting the desired width and height of the image
-var sharkWidth = sharkImage.width / 10;
-var sharkHeight = sharkImage.height / 10;
 
 
 // Obstacle image
 var obstacleReady = false;
 var obstacleImage = new Image();
+var obstacleWidth = 0;
+var obstacleHeight = 0;
 obstacleImage.onload = function () {
+    //Setting the desired width and height of the image
+    obstacleWidth = obstacleImage.width / 10;
+    obstacleHeight = obstacleImage.height / 10;
     obstacleReady = true;
 };
 obstacleImage.src = "images/obstacle.png";
-//Setting the desired width and height of the image
-var obstacleWidth = obstacleImage.width / 10;
-var obstacleHeight = obstacleImage.height / 10;
 
 
 
@@ -207,7 +213,6 @@ let placeItem = function(character, canvasRight) {
 
 // Update game objects
 var update = function (modifier) {
-
 // Calculate new positions based on key inputs
 var newX = hero.x;
 var newY = hero.y;
@@ -336,16 +341,20 @@ var render = function () {
         ctx.drawImage(bgImage, 0, 0);
     }
     if (lrReady) {
-        ctx.drawImage(lrImage, 0, 0);
-        ctx.drawImage(btImage, canvas.width - 32, 0);
+        var hedgePattern = ctx.createPattern(lrImage, "repeat");
+        ctx.fillStyle = hedgePattern;
+        ctx.fillRect(0, 0, canvas.width, 32);
+        ctx.fillRect(0, canvas.height - 32, canvas.width, 32);
     }
     if (btReady) {
-        ctx.drawImage(btImage, 0, 0);
-        ctx.drawImage(btImage, 0, canvas.width - 32);
+        var hedgePattern = ctx.createPattern(btImage, "repeat");
+        ctx.fillStyle = hedgePattern;
+        ctx.fillRect(0, 0, 32, canvas.height);
+        ctx.fillRect(canvas.width - 32, 0, canvas.width, canvas.height);
     }
     if (heroReady) {
-    ctx.drawImage(heroImage, hero.x, hero.y, heroWidth, heroHeight);
-}
+        ctx.drawImage(heroImage, hero.x, hero.y, heroWidth, heroHeight);
+    }
 
     if (monsterReady) {
         ctx.drawImage(monsterImage, monster.x, monster.y, monsterWidth, monsterHeight);
@@ -388,5 +397,9 @@ var main = function () {
 
 // Let's play this game!
 var then = Date.now();
-reset();
-main();  // call the main game loop.
+
+document.addEventListener("DOMContentLoaded", function(){
+    document.body.appendChild(canvas);
+    reset();
+    main();  // call the main game loop.
+});
