@@ -1,18 +1,6 @@
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 
-// let chessboard = [
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-// ]
-
 var soundGameOver = "sounds/gameover.mp3"; //Game Over sound efx
 var soundCaught = "sounds/caught.mp3"; // Caught sound efx
 var soundWin = "sounds/win.wav"; // Win sound efx
@@ -221,22 +209,24 @@ var reset = function (resetHeroPosition) {
     } while (!enoughSpace);
 
     // Move the sharks to random positions
-    placeItem(shark1, canvas.width);
-    placeItem(shark2, canvas.width);
-    placeItem(shark3, canvas.width);
+    placeItem(shark1, sharkHeight);
+    placeItem(shark2, sharkHeight);
+    placeItem(shark3, sharkHeight);
     
     // Reset died variable
     died = false;
 };
 
-
-
-
 // Generate random positions for the given character object
 let placeItem = function(character, padding = 32) {
-    character.x = padding + Math.random() * (canvas.width - 2 * padding);
+    if (character === shark1 || character === shark2 || character === shark3) {
+        character.x = canvas.width - padding;
+    } else {
+        character.x = padding + Math.random() * (canvas.width - 2 * padding);
+    }
     character.y = padding + Math.random() * (canvas.height - 2 * padding);
 };
+
 
 
 // Update game objects
@@ -287,17 +277,21 @@ var update = function (modifier) {
     shark1.x -= 1;
     shark2.x -= 1;
     shark3.x -= 1;
-    
+
     // Check if any shark has reached the left edge of the canvas
     if (shark1.x + sharkWidth < 0) {
-        placeItem(shark1, canvas.width);
+        shark1.x = canvas.width;
+        shark1.y = Math.random() * (canvas.height - sharkHeight);
     }
     if (shark2.x + sharkWidth < 0) {
-        placeItem(shark2, canvas.width);
+        shark2.x = canvas.width;
+        shark2.y = Math.random() * (canvas.height - sharkHeight);
     }
     if (shark3.x + sharkWidth < 0) {
-        placeItem(shark3, canvas.width);
+        shark3.x = canvas.width;
+        shark3.y = Math.random() * (canvas.height - sharkHeight);
     }
+
     
 
     // Check if hero has caught the monster
