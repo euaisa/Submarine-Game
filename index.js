@@ -1,0 +1,392 @@
+var canvas = document.createElement("canvas");
+var ctx = canvas.getContext("2d");
+
+// let chessboard = [
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+//     ['x','x','x','x','x','x','x','x','x',],
+// ]
+
+var soundGameOver = "sounds/gameover.mp3"; //Game Over sound efx
+var soundCaught = "sounds/caught.mp3"; // Caught sound efx
+var soundWin = "sounds/win.wav"; // Win sound efx
+var soundEfx = document.getElementById("soundEfx"); //Assign audio to soundEfx
+
+// Background image
+var bgReady = false;
+var bgImage = new Image();
+bgImage.onload = function () {
+    bgReady = true;
+    canvas.width = bgImage.width;
+    canvas.height = bgImage.height;
+};
+bgImage.src = "images/background.jpg";
+
+document.body.appendChild(canvas);
+// Border image L-R
+var lrReady = false;
+var lrImage = new Image();
+lrImage.onload = function () {
+    lrReady = true;
+};
+lrImage.src = "images/border_lr.png"; // <--- add image source
+
+// Border image B-T
+var btReady = false;
+var btImage = new Image();
+btImage.onload = function () {
+    btReady = true;
+};
+btImage.src = "images/border_bt.png"; // <--- add image source
+
+
+// Hero image
+var heroReady = false;
+var heroImage = new Image();
+heroImage.onload = function () {
+    heroReady = true;
+};
+heroImage.src = "images/hero.png";
+
+// Setting the desired width and height of the image
+var heroWidth = heroImage.width / 11;
+var heroHeight = heroImage.height / 11;
+
+
+// Monster image
+var monsterReady = false;
+var monsterImage = new Image();
+monsterImage.onload = function () {
+    monsterReady = true;
+};
+monsterImage.src = "images/monster.png";
+// Setting the desired width and height of the image
+var monsterWidth = monsterImage.width / 10;
+var monsterHeight = monsterImage.height / 10;
+
+
+// Shark image
+var sharkReady = false;
+var sharkImage = new Image();
+sharkImage.onload = function () {
+    sharkReady = true;
+};
+sharkImage.src = "images/shark.png";
+// Setting the desired width and height of the image
+var sharkWidth = sharkImage.width / 10;
+var sharkHeight = sharkImage.height / 10;
+
+
+// Obstacle image
+var obstacleReady = false;
+var obstacleImage = new Image();
+obstacleImage.onload = function () {
+    obstacleReady = true;
+};
+obstacleImage.src = "images/obstacle.png";
+//Setting the desired width and height of the image
+var obstacleWidth = obstacleImage.width / 10;
+var obstacleHeight = obstacleImage.height / 10;
+
+
+
+/// Game objects
+var hero = {
+    speed: 256, // movement in pixels per second
+    x: null,
+    y: null
+};
+
+
+var obstacle = {
+    x: 300,
+    y: 300
+}
+
+var obstacle2 = {
+    x: 150,
+    y: 300
+};
+
+var monster = {
+    x: 200,
+    y: 200
+};
+
+// Shark objects
+var shark1 = {
+    x: 500,
+    y: 500, 
+};
+
+var shark2 = {
+    x: 750,
+    y: 750
+};
+
+var shark3 = {
+    x: 0,
+    y: 0
+};
+
+var monstersCaught = 0;
+let died = false;
+
+// Handle keyboard controls
+var keysDown = {}; 
+
+addEventListener("keydown", function (e) {
+    keysDown[e.keyCode] = true;
+}, false);
+
+addEventListener("keyup", function (e) {
+    delete keysDown[e.keyCode];
+}, false);
+
+// Reset the game when the player catches a monster
+var reset = function () {
+    // Reset hero position
+    hero.x = canvas.width / 2 - heroWidth / 2;
+    hero.y = canvas.height / 2 - heroHeight / 2;
+
+
+    // Move the monster-treasure to a random position without overlapping obstacles
+    let monsterOverlap;
+    do {
+        monsterOverlap = false;
+        monster.x = 32 + (Math.random() * (canvas.width - 64));
+        monster.y = 32 + (Math.random() * (canvas.height - 64));
+
+        if (
+            monster.x <= (obstacle.x + obstacleWidth) &&
+            obstacle.x <= (monster.x + monsterWidth) &&
+            monster.y <= (obstacle.y + obstacleHeight) &&
+            obstacle.y <= (monster.y + monsterHeight)
+        ) {
+            monsterOverlap = true;
+        }
+
+        if (
+            monster.x <= (obstacle2.x + obstacleWidth) &&
+            obstacle2.x <= (monster.x + monsterWidth) &&
+            monster.y <= (obstacle2.y + obstacleHeight) &&
+            obstacle2.y <= (monster.y + monsterHeight)
+        ) {
+            monsterOverlap = true;
+        }
+    } while (monsterOverlap);
+
+    // Move the obstacles to random positions
+    obstacle.x = 32 + (Math.random() * (canvas.width - 64));
+    obstacle.y = 32 + (Math.random() * (canvas.height - 64));
+
+    obstacle2.x = 32 + (Math.random() * (canvas.width - 64));
+    obstacle2.y = 32 + (Math.random() * (canvas.height - 64));
+
+    // Move the sharks to random positions
+    placeItem(shark1, canvas.width);
+    placeItem(shark2, canvas.width);
+    placeItem(shark3, canvas.width);
+    
+    // Reset died variable
+    died = false;
+};
+
+// Generate random positions for the given character object
+let placeItem = function(character, canvasRight) {
+    character.x = canvasRight + (Math.random() * canvasRight);
+    character.y = 32 + (Math.random() * (canvas.height - 64));
+};
+
+
+// Update game objects
+var update = function (modifier) {
+
+// Calculate new positions based on key inputs
+var newX = hero.x;
+var newY = hero.y;
+
+if (38 in keysDown && hero.y > 32+4) { //  holding up key
+    newY -= hero.speed * modifier;
+}
+if (40 in keysDown && hero.y < canvas.height - (64 + 6)) { //  holding down key
+    newY += hero.speed * modifier;
+}
+if (37 in keysDown && hero.x > (32+4)) { // holding left key
+    newX -= hero.speed * modifier;
+}
+if (39 in keysDown && hero.x < canvas.width - (64 + 6)) { // holding right key
+    newX += hero.speed * modifier;
+}
+
+    
+    // Move all sharks to the left
+    shark1.x -= 1;
+    shark2.x -= 1;
+    shark3.x -= 1;
+    
+    // Check if any shark has reached the left edge of the canvas
+    if (shark1.x + sharkWidth < 0) {
+        placeItem(shark1, canvas.width);
+    }
+    if (shark2.x + sharkWidth < 0) {
+        placeItem(shark2, canvas.width);
+    }
+    if (shark3.x + sharkWidth < 0) {
+        placeItem(shark3, canvas.width);
+    }
+    
+
+    // Check if hero has caught the monster
+    if (
+        hero.x <= (monster.x + monsterWidth)
+        && monster.x <= (hero.x + heroWidth)
+        && hero.y <= (monster.y + monsterHeight)
+        && monster.y <= (hero.y + heroHeight)
+    ) 
+    {
+        ///play sound when touch
+        soundEfx.src = soundCaught;
+        soundEfx.play();
+        monstersCaught++;       // keep track of our “score”
+
+        // Increase hero's speed every time they catch 3 more treasures
+        if (monstersCaught % 3 === 0) {
+            hero.speed *= 1.2; // Increase the speed by 20%
+        }
+
+        reset();       // start a new cycle
+          
+    }
+
+        // Check if hero collides with any shark
+    if (
+        hero.x <= (shark1.x + sharkWidth) &&
+        shark1.x <= (hero.x + heroWidth) &&
+        hero.y <= (shark1.y + sharkHeight) &&
+        shark1.y <= (hero.y + heroHeight)
+    ) {
+        // Set the died flag to true
+        died = true;
+    }
+    if (
+        hero.x <= (shark2.x + sharkWidth) &&
+        shark2.x <= (hero.x + heroWidth) &&
+        hero.y <= (shark2.y + sharkHeight) &&
+        shark2.y <= (hero.y + heroHeight)
+    ) {
+        // Set the died flag to true
+        died = true;
+    }
+    if (
+        hero.x <= (shark3.x + sharkWidth) &&
+        shark3.x <= (hero.x + heroWidth) &&
+        hero.y <= (shark3.y + sharkHeight) &&
+        shark3.y <= (hero.y + heroHeight)
+    ) {
+        // Set the died flag to true
+        died = true;
+    }
+
+    // If the player has died, show the alert and reset the game
+    if (died) {
+        // Change sound effect and play it
+        soundEfx.src = soundGameOver;
+        soundEfx.play();
+        alert("Game Over");
+        reset();
+        monstersCaught = 0
+        hero.speed = 256
+    }
+
+
+    // Check if the new position collides with any obstacle
+    var collideObstacle1 = (
+        newX <= (obstacle.x + obstacleWidth) &&
+        obstacle.x <= (newX + heroWidth) &&
+        newY <= (obstacle.y + obstacleHeight) &&
+        obstacle.y <= (newY + heroHeight)
+    );
+
+    var collideObstacle2 = (
+        newX <= (obstacle2.x + obstacleWidth) &&
+        obstacle2.x <= (newX + heroWidth) &&
+        newY <= (obstacle2.y + obstacleHeight) &&
+        obstacle2.y <= (newY + heroHeight)
+    );
+
+    // Only update the hero's position if there is no collision
+    if (!collideObstacle1 && !collideObstacle2) {
+        hero.x = newX;
+        hero.y = newY;
+    }
+
+};
+
+
+
+var render = function () {
+    if (bgReady) {
+        ctx.drawImage(bgImage, 0, 0);
+    }
+    if (lrReady) {
+        ctx.drawImage(lrImage, 0, 0);
+        ctx.drawImage(btImage, canvas.width - 32, 0);
+    }
+    if (btReady) {
+        ctx.drawImage(btImage, 0, 0);
+        ctx.drawImage(btImage, 0, canvas.width - 32);
+    }
+    if (heroReady) {
+    ctx.drawImage(heroImage, hero.x, hero.y, heroWidth, heroHeight);
+}
+
+    if (monsterReady) {
+        ctx.drawImage(monsterImage, monster.x, monster.y, monsterWidth, monsterHeight);
+    }
+    if (sharkReady) {
+        ctx.drawImage(sharkImage, shark1.x, shark1.y, sharkWidth, sharkHeight);
+        ctx.drawImage(sharkImage, shark2.x, shark2.y, sharkWidth, sharkHeight);
+        ctx.drawImage(sharkImage, shark3.x, shark3.y, sharkWidth, sharkHeight);
+    }
+
+    if (obstacleReady) {
+        ctx.drawImage(obstacleImage, obstacle.x, obstacle.y, obstacleWidth, obstacleHeight);
+        ctx.drawImage(obstacleImage, obstacle2.x, obstacle2.y, obstacleWidth, obstacleHeight);
+    }
+
+    // Score
+    ctx.fillStyle = "rgb(250, 250, 250)";
+    ctx.font = "24px Helvetica";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("Treasures caught: " + monstersCaught, 32, 32);
+}
+
+
+//===============================
+// End of looped part of app
+//===============================
+
+// The main game loop
+var main = function () {
+    var now = Date.now();
+    var delta = now - then;
+    update(delta / 1000);
+    render();
+    then = now;
+    //  Request to do this again ASAP
+    requestAnimationFrame(main);
+};
+
+
+// Let's play this game!
+var then = Date.now();
+reset();
+main();  // call the main game loop.
