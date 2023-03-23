@@ -25,6 +25,7 @@ bgImage.onload = function () {
     bgReady = true;
     canvas.width = bgImage.width;
     canvas.height = bgImage.height;
+    reset();
 };
 bgImage.src = "images/background.jpg";
 
@@ -400,6 +401,5 @@ var then = Date.now();
 
 document.addEventListener("DOMContentLoaded", function(){
     document.body.appendChild(canvas);
-    reset();
     main();  // call the main game loop.
 });
