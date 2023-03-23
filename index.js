@@ -25,7 +25,7 @@ bgImage.onload = function () {
     bgReady = true;
     canvas.width = bgImage.width;
     canvas.height = bgImage.height;
-    reset();
+    reset(true);
 };
 bgImage.src = "images/background.jpg";
 
@@ -157,11 +157,12 @@ addEventListener("keyup", function (e) {
 }, false);
 
 // Reset the game when the player catches a monster
-var reset = function () {
-    // Reset hero position
-    hero.x = canvas.width / 2 - heroWidth / 2;
-    hero.y = canvas.height / 2 - heroHeight / 2;
-
+var reset = function (resetHeroPosition) {
+    // Reset hero position if resetHeroPosition is true
+    if (resetHeroPosition) {
+        hero.x = canvas.width / 2 - heroWidth / 2;
+        hero.y = canvas.height / 2 - heroHeight / 2;
+    }
 
     // Move the monster-treasure to a random position without overlapping obstacles
     let monsterOverlap;
@@ -233,6 +234,27 @@ var update = function (modifier) {
         if (39 in keysDown && hero.x < canvas.width - (heroWidth + 6)) { // holding right key
             newX += hero.speed * modifier;
         }
+
+        // Check if the new position collides with any obstacle
+        var collideObstacle1 = (
+            newX <= (obstacle.x + obstacleWidth) &&
+            obstacle.x <= (newX + heroWidth) &&
+            newY <= (obstacle.y + obstacleHeight) &&
+            obstacle.y <= (newY + heroHeight)
+        );
+
+        var collideObstacle2 = (
+            newX <= (obstacle2.x + obstacleWidth) &&
+            obstacle2.x <= (newX + heroWidth) &&
+            newY <= (obstacle2.y + obstacleHeight) &&
+            obstacle2.y <= (newY + heroHeight)
+        );
+
+        // Only update the hero's position if there is no collision and the game is not over
+        if (!collideObstacle1 && !collideObstacle2 && !died) {
+            hero.x = newX;
+            hero.y = newY;
+        }
     }
     
     // Move all sharks to the left
@@ -270,7 +292,7 @@ var update = function (modifier) {
             hero.speed *= 1.2; // Increase the speed by 20%
         }
 
-        reset();       // start a new cycle
+        reset(false);       // start a new cycle
           
     }
 
@@ -311,35 +333,12 @@ var update = function (modifier) {
         alert("Game Over");
         monstersCaught = 0;
         hero.speed = 256;
+        keysDown = {}; // Clear the keysDown object
         died = false;
-        reset();
-    }
-
-
-
-    // Check if the new position collides with any obstacle
-    var collideObstacle1 = (
-        newX <= (obstacle.x + obstacleWidth) &&
-        obstacle.x <= (newX + heroWidth) &&
-        newY <= (obstacle.y + obstacleHeight) &&
-        obstacle.y <= (newY + heroHeight)
-    );
-
-    var collideObstacle2 = (
-        newX <= (obstacle2.x + obstacleWidth) &&
-        obstacle2.x <= (newX + heroWidth) &&
-        newY <= (obstacle2.y + obstacleHeight) &&
-        obstacle2.y <= (newY + heroHeight)
-    );
-
-    // Only update the hero's position if there is no collision
-    if (!collideObstacle1 && !collideObstacle2) {
-        hero.x = newX;
-        hero.y = newY;
+        reset(true);
     }
 
 };
-
 
 
 var render = function () {
