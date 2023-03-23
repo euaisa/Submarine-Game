@@ -1,18 +1,6 @@
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 
-// let chessboard = [
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-//     ['x','x','x','x','x','x','x','x','x',],
-// ]
-
 var soundGameOver = "sounds/gameover.mp3"; //Game Over sound efx
 var soundCaught = "sounds/caught.mp3"; // Caught sound efx
 var soundWin = "sounds/win.wav"; // Win sound efx
