@@ -13,4 +13,4 @@ Use the right arrow key to move the hero rightwards
 Collect the treasures to score points, and avoid the obstacles and monsters. The game ends when the hero collides with an obstacle or monster.
 
 <h2>Credits</h2>
-This game was created using HTML, CSS, and JavaScript, and was based on a Prog209 class. Sound effects were obtained from https://mixkit.co/free-sound-effects/game/.
+This game was created using HTML, and JavaScript, and was based on a Prog209 class. Sound effects were obtained from https://mixkit.co/free-sound-effects/game/.
