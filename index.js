@@ -214,23 +214,26 @@ let placeItem = function(character, canvasRight) {
 
 // Update game objects
 var update = function (modifier) {
-// Calculate new positions based on key inputs
-var newX = hero.x;
-var newY = hero.y;
 
-if (38 in keysDown && hero.y > 32+4) { //  holding up key
-    newY -= hero.speed * modifier;
-}
-if (40 in keysDown && hero.y < canvas.height - (64 + 6)) { //  holding down key
-    newY += hero.speed * modifier;
-}
-if (37 in keysDown && hero.x > (32+4)) { // holding left key
-    newX -= hero.speed * modifier;
-}
-if (39 in keysDown && hero.x < canvas.width - (64 + 6)) { // holding right key
-    newX += hero.speed * modifier;
-}
+    // If the game is over, do not process key inputs
+    if (!died) {
+        // Calculate new positions based on key inputs
+        var newX = hero.x;
+        var newY = hero.y;
 
+        if (38 in keysDown && hero.y > 32 + 4) { // holding up key
+            newY -= hero.speed * modifier;
+        }
+        if (40 in keysDown && hero.y < canvas.height - (heroHeight + 6)) { // holding down key
+            newY += hero.speed * modifier;
+        }
+        if (37 in keysDown && hero.x > (32 + 4)) { // holding left key
+            newX -= hero.speed * modifier;
+        }
+        if (39 in keysDown && hero.x < canvas.width - (heroWidth + 6)) { // holding right key
+            newX += hero.speed * modifier;
+        }
+    }
     
     // Move all sharks to the left
     shark1.x -= 1;
@@ -306,10 +309,12 @@ if (39 in keysDown && hero.x < canvas.width - (64 + 6)) { // holding right key
         soundEfx.src = soundGameOver;
         soundEfx.play();
         alert("Game Over");
+        monstersCaught = 0;
+        hero.speed = 256;
+        died = false;
         reset();
-        monstersCaught = 0
-        hero.speed = 256
     }
+
 
 
     // Check if the new position collides with any obstacle
