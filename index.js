@@ -156,6 +156,15 @@ addEventListener("keyup", function (e) {
     delete keysDown[e.keyCode];
 }, false);
 
+// Check if there's enough space between two characters
+function checkDistance(character1, character2, minDistance) {
+    var dx = character1.x - character2.x;
+    var dy = character1.y - character2.y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance >= minDistance;
+}
+
 // Reset the game when the player catches a monster
 var reset = function (resetHeroPosition) {
     // Reset hero position if resetHeroPosition is true
@@ -190,12 +199,27 @@ var reset = function (resetHeroPosition) {
         }
     } while (monsterOverlap);
 
-    // Move the obstacles to random positions
-    obstacle.x = 32 + (Math.random() * (canvas.width - 64));
-    obstacle.y = 32 + (Math.random() * (canvas.height - 64));
+    // Move the obstacles to random positions ensuring there's enough space between them
+    let enoughSpace;
+    do {
+        enoughSpace = true;
 
-    obstacle2.x = 32 + (Math.random() * (canvas.width - 64));
-    obstacle2.y = 32 + (Math.random() * (canvas.height - 64));
+        obstacle.x = 32 + (Math.random() * (canvas.width - 64));
+        obstacle.y = 32 + (Math.random() * (canvas.height - 64));
+
+        obstacle2.x = 32 + (Math.random() * (canvas.width - 64));
+        obstacle2.y = 32 + (Math.random() * (canvas.height - 64));
+
+        // Check if there's enough space between obstacles and the hero
+        if (!checkDistance(hero, obstacle, 100) || !checkDistance(hero, obstacle2, 100)) {
+            enoughSpace = false;
+        }
+
+        // Check if there's enough space between obstacles
+        if (!checkDistance(obstacle, obstacle2, 100)) {
+            enoughSpace = false;
+        }
+    } while (!enoughSpace);
 
     // Move the sharks to random positions
     placeItem(shark1, canvas.width);
@@ -205,6 +229,9 @@ var reset = function (resetHeroPosition) {
     // Reset died variable
     died = false;
 };
+
+
+
 
 // Generate random positions for the given character object
 let placeItem = function(character, canvasRight) {
